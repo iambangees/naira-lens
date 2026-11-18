@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Naira Lens — what a dollar is really worth in Lagos</title>
+<meta name="description" content="Convert dollars, pounds and euros to naira at the live official rate — then see what that money actually buys in Lagos.">
+<meta property="og:title" content="Naira Lens — what a dollar is really worth in Lagos">
+<meta property="og:description" content="Live official USD→NGN rate, a 90-day chart, and the real-life Lagos prices behind the number.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="banner.png">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  :root { --bg:#0d130f; --card:#16211a; --line:#27382c; --text:#eef5ef; --muted:#9db3a4; --accent:#3ecf6e; --gold:#f2c14e; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background:var(--bg); color:var(--text); }
+  .wrap { max-width: 680px; margin: 0 auto; padding: 28px 16px 56px; }
+  h1 { font-size: 34px; margin: 6px 0 2px; }
+  h1 .dot { color: var(--accent); }
+  .tag { color: var(--muted); margin: 0 0 18px; line-height: 1.5; }
+  .hero-img { width: 100%; border-radius: 16px; border: 1px solid var(--line); margin: 2px 0 20px; display: block; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; margin-top: 16px; }
+  .rate-big { font-size: 15px; color: var(--muted); }
+  .rate-big b { color: var(--text); font-size: 26px; }
+  .rate-sub { color: var(--muted); font-size: 13px; margin-top: 4px; line-height: 1.5; }
+  .chg { font-weight: 700; }
+  .up { color: #ff8a7a; } .down { color: var(--accent); }
+  label { display:block; font-size: 12.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 14px 0 6px; }
+  .conv { display: flex; gap: 10px; flex-wrap: wrap; }
+  .conv input { flex: 2; min-width: 140px; background:#0a0f0b; color:var(--text); border:1px solid var(--line); border-radius: 10px; padding: 13px 14px; font-size: 19px; }
+  .conv select { flex: 1; min-width: 110px; background:#0a0f0b; color:var(--text); border:1px solid var(--line); border-radius: 10px; padding: 13px 10px; font-size: 16px; }
+  .result { font-size: 30px; font-weight: 800; margin-top: 16px; line-height: 1.25; }
+  .result small { display:block; font-size: 13.5px; color: var(--muted); font-weight: 500; margin-top: 4px; }
+  .chips { display:flex; gap:8px; flex-wrap: wrap; margin-top: 12px; }
+  .chip { border:1px solid var(--line); color:var(--muted); border-radius: 999px; padding: 6px 13px; font-size: 13.5px; cursor:pointer; background: transparent; font-weight: 600; }
+  .chip:hover { color: var(--text); border-color: var(--accent); }
+  button.main { background: var(--accent); color:#07130b; border:0; border-radius: 10px; padding: 12px 18px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 14px; }
+  h3 { margin: 4px 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .buys div { display:flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+  .buys div:last-child { border-bottom: 0; }
+  .buys b { color: var(--gold); white-space: nowrap; }
+  .buys span { color: var(--muted); }
+  .foot { color: var(--muted); font-size: 13px; line-height: 1.65; margin-top: 22px; }
+  svg { width: 100%; height: 90px; display: block; }
+  .err { color: #ff8a7a; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Naira Lens<span class="dot">.</span></h1>
+  <p class="tag">A dollar figure means nothing until you see it in naira — and in Lagos prices. Live official rate, a 90-day view, and what your money actually buys.</p>
+  <img class="hero-img" src="banner.png" alt="Lagos skyline with naira and dollar symbols">
+
+  <div class="card">
+    <div class="rate-big">Today: <b id="rateLine">loading the rate…</b></div>
+    <div class="rate-sub" id="rateSub"></div>
+    <svg id="chart" viewBox="0 0 640 90" preserveAspectRatio="none" style="margin-top:12px"></svg>
+    <div class="rate-sub" id="chartSub"></div>
+
+    <label for="amt">Amount</label>
+    <div class="conv">
+      <input type="number" id="amt" value="100" min="0" step="any">
+      <select id="cur">
+        <option value="USD" selected>USD — $</option>
+        <option value="GBP">GBP — £</option>
+        <option value="EUR">EUR — €</option>
+        <option value="AED">AED — د.إ</option>
+        <option value="CAD">CAD — $</option>
+        <option value="CNY">CNY — ¥</option>
+        <option value="NGN">NGN — ₦</option>
+      </select>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="result" id="result"></div>
+    <button class="main" id="btnCopy">Copy this result</button>
+  </div>
+
+  <div class="card">
+    <h3>What that buys in Lagos</h3>
+    <div class="buys" id="buys"></div>
+    <div class="rate-sub" style="margin-top:10px">Rough Lagos ballparks, November 2026 — prices move, sometimes weekly. Treat these as a feel for the money, not a price list.</div>
+  </div>
+
+  <p class="foot"><b>Honest notes.</b> The rate is the official mid-market rate (sources: ExchangeRate-API open feed, cross-checked with a second public feed), updated daily. The <b>parallel/street rate is usually different</b> — often higher — and this tool doesn't quote it, because no reliable public feed publishes it. If someone shows you a single "true" rate without a source, be suspicious. Built by Bangees.</p>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const fmtNGN = (v) => "₦" + v.toLocaleString("en-NG", { maximumFractionDigits: v < 100 ? 2 : 0 });
+const fmtNum = (v) => v.toLocaleString("en-US", { maximumFractionDigits: 2 });
+
+// Rough Lagos prices (NGN), November 2026 ballparks.
+const PRICES = [
+  { label: "months of national minimum wage (₦70,000)", price: 70000 },
+  { label: "50kg bags of rice", price: 65000 },
+  { label: "whole chickens", price: 18000 },
+  { label: "Bolt rides, Ikeja → Lekki", price: 12000 },
+  { label: "crates of eggs (30)", price: 6000 },
+  { label: "cinema tickets", price: 6000 },
+  { label: "10GB mobile data bundles", price: 3500 },
+  { label: "plates of jollof at a buka", price: 2500 },
+  { label: "haircuts", price: 2000 },
+  { label: "loaves of bread", price: 1800 },
+  { label: "litres of petrol", price: 950 },
+  { label: "danfo bus rides", price: 500 },
+  { label: "bags of sachet water (20 sachets)", price: 500 },
+];
+
+let RATES = null; // per-USD rates from the feed: {NGN: 1352.7, EUR: 0.92, ...}
+let lastNGN = 0;
+
+function convert() {
+  if (!RATES) return;
+  const amt = parseFloat($("amt").value) || 0;
+  const cur = $("cur").value;
+  const ngn = cur === "NGN" ? amt : amt * (RATES.NGN / RATES[cur]);
+  lastNGN = ngn;
+  if (cur === "NGN") {
+    $("result").innerHTML = `${fmtNGN(ngn)} <small>= $${fmtNum(ngn / RATES.NGN)} at today's official rate</small>`;
+  } else {
+    $("result").innerHTML = `${fmtNGN(ngn)} <small>for ${fmtNum(amt)} ${cur} at today's official rate</small>`;
+  }
+  const rows = PRICES.map(p => ({ ...p, n: ngn / p.price })).filter(r => r.n >= 0.05);
+  rows.sort((a, b) => Math.abs(Math.log10(a.n)) - Math.abs(Math.log10(b.n)));
+  const show = rows.slice(0, 8).sort((a, b) => b.n - a.n);
+  $("buys").innerHTML = show.length
+    ? show.map(r => `<div><span>${r.label}</span><b>× ${r.n >= 100 ? Math.round(r.n).toLocaleString() : r.n.toFixed(1)}</b></div>`).join("")
+    : `<div><span>Enter an amount to see its Lagos weight.</span></div>`;
+}
+
+$("chips").innerHTML = [10, 50, 100, 500, 1000].map(v => `<button class="chip" data-v="${v}">$${v}</button>`).join("");
+document.querySelectorAll(".chip").forEach(ch => ch.onclick = () => { $("cur").value = "USD"; $("amt").value = ch.dataset.v; convert(); });
+$("amt").addEventListener("input", convert);
+$("cur").addEventListener("change", convert);
+
+$("btnCopy").onclick = async () => {
+  if (!RATES) return;
+  const cur = $("cur").value, amt = parseFloat($("amt").value) || 0;
+  const text = cur === "NGN"
+    ? `${fmtNGN(lastNGN)} = $${fmtNum(lastNGN / RATES.NGN)} (official rate, Naira Lens)`
+    : `${fmtNum(amt)} ${cur} = ${fmtNGN(lastNGN)} at today's official rate (Naira Lens)`;
+  try { await navigator.clipboard.writeText(text); $("btnCopy").textContent = "Copied ✓"; setTimeout(() => $("btnCopy").textContent = "Copy this result", 1600); }
+  catch (e) { $("btnCopy").textContent = text; }
+};
+
+async function loadRate() {
+  try {
+    const r = await fetch("https://open.er-api.com/v6/latest/USD");
+    const d = await r.json();
+    if (d.result !== "success") throw new Error("feed");
+    RATES = d.rates;
+    $("rateLine").innerHTML = `$1 = ${fmtNGN(RATES.NGN)}`;
+    $("rateSub").textContent = "Official rate · updated " + d.time_last_update_utc.replace(" UTC", "") + " UTC · source: ExchangeRate-API";
+    convert();
+  } catch (e) {
+    try {
+      const r = await fetch("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json");
+      const d = await r.json();
+      RATES = { NGN: d.usd.ngn, EUR: d.usd.eur, GBP: d.usd.gbp, AED: d.usd.aed, CAD: d.usd.cad, CNY: d.usd.cny, USD: 1 };
+      $("rateLine").innerHTML = `$1 = ${fmtNGN(RATES.NGN)}`;
+      $("rateSub").textContent = "Official rate · as of " + d.date + " · source: Fawaz Ahmed currency API (fallback feed)";
+      convert();
+    } catch (e2) {
+      $("rateLine").innerHTML = '<span class="err">Could not load the rate — check your connection and reload.</span>';
+    }
+  }
+}
+
+async function loadHistory() {
+  const pts = [];
+  const today = new Date();
+  for (let back = 90; back >= 0; back -= 7) {
+    const d = new Date(today); d.setDate(d.getDate() - back);
+    const iso = d.toISOString().slice(0, 10);
+    try {
+      const r = await fetch(`https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${iso}/v1/currencies/usd.json`);
+      if (!r.ok) continue;
+      const j = await r.json();
+      if (j.usd && j.usd.ngn) pts.push({ date: iso, rate: j.usd.ngn });
+    } catch (e) { /* skip missing days */ }
+  }
+  if (pts.length < 3) { $("chartSub").textContent = ""; return; }
+  const min = Math.min(...pts.map(p => p.rate)), max = Math.max(...pts.map(p => p.rate));
+  const pad = (max - min) * 0.15 || 1;
+  const X = (i) => (i / (pts.length - 1)) * 620 + 10;
+  const Y = (v) => 82 - ((v - (min - pad)) / ((max + pad) - (min - pad))) * 74;
+  const line = pts.map((p, i) => `${i === 0 ? "M" : "L"}${X(i).toFixed(1)},${Y(p.rate).toFixed(1)}`).join(" ");
+  $("chart").innerHTML = `<path d="${line}" fill="none" stroke="#3ecf6e" stroke-width="2.5" stroke-linejoin="round"/>` +
+    pts.map((p, i) => `<circle cx="${X(i)}" cy="${Y(p.rate)}" r="2.6" fill="#f2c14e"/>`).join("");
+  const first = pts[0], last = pts[pts.length - 1];
+  const chg = ((last.rate - first.rate) / first.rate) * 100;
+  const cls = chg > 0.05 ? "up" : chg < -0.05 ? "down" : "";
+  const word = chg > 0.05 ? "the dollar gained" : chg < -0.05 ? "the naira gained" : "roughly flat";
+  $("chartSub").innerHTML = `Last ~90 days (weekly points): $1 went from ${fmtNGN(first.rate)} (${first.date}) to ${fmtNGN(last.rate)} (${last.date}) — <span class="chg ${cls}">${chg >= 0 ? "+" : ""}${chg.toFixed(2)}%</span>, ${word} against the naira. Remember: a rising ₦ number means a weaker naira.`;
+}
+
+loadRate();
+loadHistory();
+</script>
+</body>
+</html>
