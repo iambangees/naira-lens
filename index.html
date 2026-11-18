@@ -190,8 +190,8 @@ async function loadHistory() {
   const first = pts[0], last = pts[pts.length - 1];
   const chg = ((last.rate - first.rate) / first.rate) * 100;
   const cls = chg > 0.05 ? "up" : chg < -0.05 ? "down" : "";
-  const word = chg > 0.05 ? "the dollar gained" : chg < -0.05 ? "the naira gained" : "roughly flat";
-  $("chartSub").innerHTML = `Last ~90 days (weekly points): $1 went from ${fmtNGN(first.rate)} (${first.date}) to ${fmtNGN(last.rate)} (${last.date}) — <span class="chg ${cls}">${chg >= 0 ? "+" : ""}${chg.toFixed(2)}%</span>, ${word} against the naira. Remember: a rising ₦ number means a weaker naira.`;
+  const word = chg > 0.05 ? "the dollar gained against the naira" : chg < -0.05 ? "the naira gained against the dollar" : "roughly flat against the dollar";
+  $("chartSub").innerHTML = `Last ~90 days (weekly points): $1 went from ${fmtNGN(first.rate)} (${first.date}) to ${fmtNGN(last.rate)} (${last.date}) — <span class="chg ${cls}">${chg >= 0 ? "+" : ""}${chg.toFixed(2)}%</span>, ${word}. Remember: a rising ₦ number means a weaker naira.`;
 }
 
 loadRate();
